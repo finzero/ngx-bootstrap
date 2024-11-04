@@ -1,4 +1,4 @@
-import { Component, input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, effect, input } from '@angular/core';
 import { AccordionPanelComponent } from './accordion-group.component';
 import { AccordionConfig } from './accordion.config';
 
@@ -15,7 +15,7 @@ import { AccordionConfig } from './accordion.config';
     },
     standalone: true
 })
-export class AccordionComponent implements OnChanges {
+export class AccordionComponent {
   /** turn on/off animation */
   isAnimated = input<boolean>(false);
   _isAnimated = this.isAnimated();
@@ -28,17 +28,11 @@ export class AccordionComponent implements OnChanges {
 
   constructor(config: AccordionConfig) {
     Object.assign(this, config);
-  }
-
-  ngOnChanges(changes: SimpleChanges) {
-    if (changes['isAnimated'] && !changes['isAnimated'].firstChange) {
-      // Only update if foo has changed and isn't the initial setup
+    effect(() => {
       this._isAnimated = this.isAnimated();
-    }
-    if (changes['closeOthers'] && !changes['closeOthers'].firstChange) {
-      // Only update if foo has changed and isn't the initial setup
       this._closeOthers = this.closeOthers();
-    }
+
+    });
   }
 
   closeOtherPanels(openGroup: AccordionPanelComponent): void {
