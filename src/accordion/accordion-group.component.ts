@@ -1,5 +1,5 @@
 import {
-  Component, HostBinding, Inject, Input, OnDestroy, OnInit, Output, EventEmitter
+  Component, HostBinding, Inject, OnDestroy, OnInit, input, output, model
 } from '@angular/core';
 import { AccordionComponent } from './accordion.component';
 import { CollapseModule } from 'ngx-bootstrap/collapse';
@@ -27,44 +27,38 @@ export class AccordionPanelComponent implements OnInit, OnDestroy {
   /** turn on/off animation */
   isAnimated = false;
   /** Clickable text in accordion's group header, check `accordion heading` below for using html in header */
-  @Input() heading!: string;
+  public heading = input<string>();
   /** Provides an ability to use Bootstrap's contextual panel classes
    * (`panel-primary`, `panel-success`, `panel-info`, etc...).
    * List of all available classes [available here]
    * (https://getbootstrap.com/docs/3.3/components/#panels-alternatives)
    */
-  @Input() panelClass = 'panel-default';
+  public panelClass = input<string>('panel-default');
   /** if <code>true</code> — disables accordion group */
-  @Input() isDisabled = false;
+  public isDisabled = input<boolean>(false);
   /** Emits when the opened state changes */
-  @Output() isOpenChange: EventEmitter<boolean> = new EventEmitter();
+  public isOpenChange = output<boolean>();
 
   // Questionable, maybe .panel-open should be on child div.panel element?
   /** Is accordion group open or closed. This property supports two-way binding */
   @HostBinding('class.panel-open')
-  @Input()
-  get isOpen(): boolean {
-    return this._isOpen;
-  }
-
-  set isOpen(value: boolean) {
-    if (value !== this.isOpen) {
-      if (value) {
-        this.accordion.closeOtherPanels(this);
-      }
-      this._isOpen = value;
-      Promise.resolve(null)
-      .then(() => {
-        this.isOpenChange.emit(value);
-      });
-    }
-  }
+  public isOpen = model<boolean>(false);
 
   protected _isOpen = false;
   protected accordion: AccordionComponent;
 
   constructor(@Inject(AccordionComponent) accordion: AccordionComponent) {
     this.accordion = accordion;
+
+    this.isOpen.subscribe((value) => {
+      if (value !== this._isOpen) {
+        if (value) {
+          this.accordion.closeOtherPanels(this);
+        }
+        this._isOpen = value;
+        this.isOpenChange.emit(value);
+      }
+    });
   }
 
   ngOnInit(): void {
@@ -76,8 +70,8 @@ export class AccordionPanelComponent implements OnInit, OnDestroy {
   }
 
   toggleOpen(): void {
-    if (!this.isDisabled) {
-      this.isOpen = !this.isOpen;
+    if (!this.isDisabled()) {
+      this.isOpen.set(!this.isOpen());
     }
   }
 }

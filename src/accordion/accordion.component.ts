@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, input, OnChanges, SimpleChanges } from '@angular/core';
 import { AccordionPanelComponent } from './accordion-group.component';
 import { AccordionConfig } from './accordion.config';
 
@@ -8,18 +8,21 @@ import { AccordionConfig } from './accordion.config';
     template: `<ng-content></ng-content>`,
     // eslint-disable-next-line @angular-eslint/no-host-metadata-property
     host: {
-        '[attr.aria-multiselectable]': 'closeOthers',
+        '[attr.aria-multiselectable]': '_closeOthers',
         role: 'tablist',
         class: 'panel-group',
         style: 'display: block'
     },
     standalone: true
 })
-export class AccordionComponent {
+export class AccordionComponent implements OnChanges {
   /** turn on/off animation */
-  @Input() isAnimated = false;
+  isAnimated = input<boolean>(false);
+  _isAnimated = this.isAnimated();
+
   /** if `true` expanding one item will close all others */
-  @Input() closeOthers = false;
+  closeOthers = input<boolean>(false);
+  _closeOthers = this.closeOthers();
 
   protected groups: AccordionPanelComponent[] = [];
 
@@ -27,20 +30,31 @@ export class AccordionComponent {
     Object.assign(this, config);
   }
 
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['isAnimated'] && !changes['isAnimated'].firstChange) {
+      // Only update if foo has changed and isn't the initial setup
+      this._isAnimated = this.isAnimated();
+    }
+    if (changes['closeOthers'] && !changes['closeOthers'].firstChange) {
+      // Only update if foo has changed and isn't the initial setup
+      this._closeOthers = this.closeOthers();
+    }
+  }
+
   closeOtherPanels(openGroup: AccordionPanelComponent): void {
-    if (!this.closeOthers) {
+    if (!this._closeOthers) {
       return;
     }
 
     this.groups.forEach((group: AccordionPanelComponent) => {
       if (group !== openGroup) {
-        group.isOpen = false;
+        group.isOpen.set(false);
       }
     });
   }
 
   addGroup(group: AccordionPanelComponent): void {
-    group.isAnimated = this.isAnimated;
+    group.isAnimated = this._isAnimated;
     this.groups.push(group);
   }
 

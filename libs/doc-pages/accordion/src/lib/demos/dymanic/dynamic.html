@@ -4,7 +4,7 @@
   </button>
 </p>
 
-<accordion>
+<accordion [isAnimated]="false">
   <accordion-group *ngFor="let group of groups" [heading]="group.title">
     {{ group?.content }}
   </accordion-group>
