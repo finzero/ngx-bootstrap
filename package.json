@@ -43,7 +43,7 @@
     "pw:show-report": "npx playwright show-report apps/ngx-bootstrap-docs-e2e/playwright-report",
     "scully": "scully",
     "scully:serve": "scully serve",
-    "prepare": "husky install",
+    "prepare": "cd ../../ && husky install .husky",
     "version": "npx ts-node ./scripts/set-version.ts",
     "release": "release-it",
     "dev:ssr": "ng run ngx-bootstrap-docs:serve-ssr",
